@@ -22,8 +22,7 @@ DATA_FILE = "data/Jalgaon_all_crops_monthly.csv"
 WEATHER_FILE = "data/jalgaon_weather_history.csv"
 MODEL_FILE = "models/crop_price_weather_model.pkl"
 
-# Load your Groq API Key securely from the .env file
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# API key is now fetched from the sidebar input or environment variable
 
 # ============================================================
 # HELPERS
@@ -174,6 +173,9 @@ weather_df["Month_num"] = weather_df["Month"].astype(int)
 
 # Sidebar
 st.sidebar.header("Configuration")
+user_api_key = st.sidebar.text_input("Groq API Key", type="password", help="Enter your Groq API key. Falls back to environment variable if empty.")
+GROQ_API_KEY = user_api_key if user_api_key else os.getenv("GROQ_API_KEY")
+
 selected_crop = st.sidebar.selectbox("Select Crop", crops)
 
 # 2026 Estimated baseline prices to bridge the dataset gap automatically
@@ -379,4 +381,4 @@ else:
                     except Exception as e:
                         st.error(f"Error communicating with Groq API: {e}")
     else:
-        st.warning("⚠️ Groq API Key is not set in the .env file. Please add GROQ_API_KEY=your_key to the .env file.")
+        st.warning("⚠️ Groq API Key is not set. Please enter it in the sidebar Configuration to use the AI assistant.")
