@@ -352,7 +352,7 @@ else:
 st.sidebar.markdown("---")
 st.sidebar.subheader(t["prediction_settings_header"])
 target_year = st.sidebar.number_input(t["target_year_label"], min_value=2024, max_value=2028, value=2026)
-target_month = st.sidebar.slider(t["target_month_label"], 1, 12, 12)
+target_month = 12 # Default to December
 target_date = pd.Timestamp(year=target_year, month=target_month, day=1)
 
 # Fetch Weather
@@ -422,7 +422,8 @@ else:
             history = pd.concat([history, new_row], ignore_index=True)
             current_date = current_date + pd.DateOffset(months=1)
 
-        start_display_date = latest_date - pd.DateOffset(months=3)
+        current_system_date = pd.Timestamp(year=pd.Timestamp.today().year, month=pd.Timestamp.today().month, day=1)
+        start_display_date = current_system_date - pd.DateOffset(months=3)
         
         display_history = history[(history["month"] >= start_display_date) & (history["month"] <= target_date)].copy()
         if display_history.empty:
