@@ -16,7 +16,7 @@ load_dotenv()
 # CONFIGURATION
 # ============================================================
 
-st.set_page_config(page_title="AgriSmart Forecast", page_icon="🌾", layout="wide")
+st.set_page_config(page_title="ॲग्रीस्मार्ट अंदाज", page_icon="🌾", layout="wide")
 
 DATA_FILE = "data/Jalgaon_all_crops_monthly.csv"
 WEATHER_FILE = "data/jalgaon_weather_history.csv"
@@ -154,11 +154,12 @@ def create_future_features(history_df, crop, prediction_date, temp, humidity, ra
 # APP UI
 # ============================================================
 
-st.title("🌾 AgriSmart: Crop Price Forecast & Agronomic Advisory")
-st.markdown("Predict future crop prices using historical trends and live weather data. Powered by Open-Meteo & Groq LLM.")
+st.title("🌾 ॲग्रीस्मार्ट: पीक भाव अंदाज आणि कृषी सल्ला")
+st.markdown("ऐतिहासिक कल आणि थेट हवामान डेटा वापरून भविष्यातील पीक भावाचा अंदाज घ्या. Open-Meteo आणि Groq LLM द्वारे समर्थित.")
+st.warning("**अस्वीकरण:** दर्शविलेले भाव ऐतिहासिक कलावर आधारित मशीन लर्निंग मॉडेल्सद्वारे व्युत्पन्न केलेले अंदाज आहेत. ते वास्तविक बाजारभावाचे प्रतिनिधित्व करत नाहीत किंवा हमी देत नाहीत आणि केवळ माहितीच्या उद्देशाने वापरले जावेत.")
 
 if not os.path.exists(DATA_FILE):
-    st.error("Data file missing! Please ensure you have placed it in the 'data' folder inside AgriSmart_App.")
+    st.error("डेटा फाईल गहाळ आहे! कृपया ती AgriSmart_App मधील 'data' फोल्डरमध्ये असल्याची खात्री करा.")
     st.stop()
 
 # Load Data
@@ -172,11 +173,11 @@ weather_df["Month_num"] = weather_df["Month"].astype(int)
 # Removed single pipeline loading from here
 
 # Sidebar
-st.sidebar.header("Configuration")
-user_api_key = st.sidebar.text_input("Groq API Key", type="password", help="Enter your Groq API key. Falls back to environment variable if empty.")
+st.sidebar.header("कॉन्फिगरेशन")
+user_api_key = st.sidebar.text_input("Groq API Key (ग्रोक एपीआय की)", type="password", help="तुमची Groq API Key टाका. रिक्त असल्यास पर्यावरण व्हेरिएबल (environment variable) वापरले जाईल.")
 GROQ_API_KEY = user_api_key if user_api_key else os.getenv("GROQ_API_KEY")
 
-selected_crop = st.sidebar.selectbox("Select Crop", crops)
+selected_crop = st.sidebar.selectbox("पीक निवडा", crops)
 
 # 2026 Estimated baseline prices to bridge the dataset gap automatically
 CURRENT_MARKET_PRICES_2026 = {
@@ -198,20 +199,20 @@ history = history[history["crop"] == selected_crop].sort_values("month")
 latest_csv_date = history["month"].max()
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("補 Current Market Data")
-st.sidebar.write(f"Dataset currently ends at: **{latest_csv_date.strftime('%B %Y')}**")
+st.sidebar.subheader("補 वर्तमान बाजार डेटा")
+st.sidebar.write(f"डेटासेट सध्या येथे संपतो: **{latest_csv_date.strftime('%B %Y')}**")
 
-use_custom_data = st.sidebar.checkbox("Add Recent Market Data to Improve Accuracy")
+use_custom_data = st.sidebar.checkbox("अचूकता सुधारण्यासाठी अलीकडील बाजार डेटा जोडा")
 if use_custom_data:
     # Let the user set the "current" month to bypass the gap in the dataset
-    custom_year = st.sidebar.number_input("Current Year", min_value=2024, max_value=2028, value=pd.Timestamp.today().year)
-    custom_month = st.sidebar.slider("Current Month", 1, 12, pd.Timestamp.today().month)
+    custom_year = st.sidebar.number_input("चालू वर्ष", min_value=2024, max_value=2028, value=pd.Timestamp.today().year)
+    custom_month = st.sidebar.slider("चालू महिना", 1, 12, pd.Timestamp.today().month)
     
     default_price = CURRENT_MARKET_PRICES_2026.get(selected_crop, float(history["avg_modal_price"].iloc[-1]))
     
-    price_1_month_ago = st.sidebar.number_input(f"1 Month Ago Price (₹)", value=float(default_price * 0.95))
-    price_7_days_ago = st.sidebar.number_input(f"7 Days Ago Price (₹)", value=float(default_price))
-    custom_price = st.sidebar.number_input(f"Current Price (₹)", value=float(default_price))
+    price_1_month_ago = st.sidebar.number_input(f"१ महिन्यापूर्वीचा भाव (₹)", value=float(default_price * 0.95))
+    price_7_days_ago = st.sidebar.number_input(f"७ दिवसांपूर्वीचा भाव (₹)", value=float(default_price))
+    custom_price = st.sidebar.number_input(f"सध्याचा भाव (₹)", value=float(default_price))
     
     current_date_input = pd.Timestamp(year=custom_year, month=custom_month, day=1)
     prev_month_input = current_date_input - pd.DateOffset(months=1)
@@ -234,42 +235,42 @@ else:
     latest_date = latest_csv_date
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("Prediction Settings")
-target_year = st.sidebar.number_input("Target Forecast Year", min_value=2024, max_value=2028, value=2026)
-target_month = st.sidebar.slider("Target Forecast Month", 1, 12, 12)
+st.sidebar.subheader("अंदाज सेटिंग्ज")
+target_year = st.sidebar.number_input("अंदाजाचे वर्ष", min_value=2024, max_value=2028, value=2026)
+target_month = st.sidebar.slider("अंदाजाचा महिना", 1, 12, 12)
 target_date = pd.Timestamp(year=target_year, month=target_month, day=1)
 
 # Fetch Weather
 weather_metrics = fetch_weather_forecast()
 
 if weather_metrics:
-    st.subheader("🌤️ Live Agronomic Weather Advisory (Next 14 Days)")
+    st.subheader("🌤️ थेट कृषी हवामान सल्ला (पुढील १४ दिवस)")
     cols = st.columns(4)
-    cols[0].metric("Avg Temperature", f"{weather_metrics['avg_temp']:.1f} °C", "Heat stress / growth")
-    cols[1].metric("Avg Humidity", f"{weather_metrics['avg_humidity']:.1f} %", "Disease risk")
-    cols[2].metric("Total Rain", f"{weather_metrics['total_rain']:.1f} mm", f"{weather_metrics['max_precip_prob']:.0f}% Peak Prob")
-    cols[3].metric("Avg Wind Speed", f"{weather_metrics['avg_wind']:.1f} km/h", "Spraying conditions")
+    cols[0].metric("सरासरी तापमान", f"{weather_metrics['avg_temp']:.1f} °C", "उष्णता ताण / वाढ")
+    cols[1].metric("सरासरी आर्द्रता", f"{weather_metrics['avg_humidity']:.1f} %", "रोगाचा धोका")
+    cols[2].metric("एकूण पाऊस", f"{weather_metrics['total_rain']:.1f} मिमी", f"{weather_metrics['max_precip_prob']:.0f}% शक्यता")
+    cols[3].metric("सरासरी वाऱ्याचा वेग", f"{weather_metrics['avg_wind']:.1f} किमी/तास", "फवारणीची स्थिती")
     
     cols2 = st.columns(4)
-    cols2[0].metric("Total ET₀", f"{weather_metrics['total_et0']:.1f} mm", "Water demand")
-    cols2[1].metric("Soil Moisture", f"{weather_metrics['avg_soil_moisture']:.3f}", "0-1cm depth")
+    cols2[0].metric("एकूण बाष्पीभवन (ET₀)", f"{weather_metrics['total_et0']:.1f} मिमी", "पाण्याची मागणी")
+    cols2[1].metric("मातीतील ओलावा", f"{weather_metrics['avg_soil_moisture']:.3f}", "०-१ सेमी खोली")
     
-    with st.expander("📅 View Date-wise Daily Weather Details"):
+    with st.expander("📅 तारखेनुसार दररोजचे हवामान तपशील पहा"):
         st.dataframe(weather_metrics["daily_df"], use_container_width=True)
 
 st.markdown("---")
-st.subheader(f"📈 Price Forecast for {selected_crop}")
+st.subheader(f"📈 {selected_crop} साठी भावाचा अंदाज")
 
 MODEL_FILE = f"models/crop_price_weather_model_{selected_crop}.pkl"
 if not os.path.exists(MODEL_FILE):
-    st.error(f"Model file for {selected_crop} not found! Please run train_weather_model.py again.")
+    st.error(f"{selected_crop} साठी मॉडेल फाईल सापडली नाही! कृपया train_weather_model.py पुन्हा चालवा.")
     st.stop()
 pipeline = joblib.load(MODEL_FILE)
 
 if target_date <= latest_date:
-    st.warning(f"Target date {target_date.strftime('%B %Y')} is not in the future compared to {latest_date.strftime('%B %Y')}.")
+    st.warning(f"लक्ष्य तारीख {target_date.strftime('%B %Y')} ही {latest_date.strftime('%B %Y')} च्या तुलनेत भविष्यात नाही.")
 else:
-    with st.spinner("Calculating future prices recursively..."):
+    with st.spinner("भविष्यातील भावांची गणना करत आहे..."):
         current_date = latest_date + pd.DateOffset(months=1)
         forecast_results = []
         is_first_prediction = True
@@ -315,29 +316,30 @@ else:
         if display_history.empty:
             display_history = history.tail(6).copy() # Fallback if dates are weird
             
-        display_history["Month"] = display_history["month"].dt.strftime("%Y-%m")
-        display_history["Price (₹)"] = display_history["avg_modal_price"].round(2)
+        display_history["महिना"] = display_history["month"].dt.strftime("%Y-%m")
+        display_history["भाव (₹)"] = display_history["avg_modal_price"].round(2)
         
         def get_type(d):
-            if d > latest_date: return "Predicted"
-            elif d == latest_date: return "Current"
-            else: return "Historical"
+            if d > latest_date: return "अंदाज (Predicted)"
+            elif d == latest_date: return "वर्तमान (Current)"
+            else: return "ऐतिहासिक (Historical)"
             
-        display_history["Type"] = display_history["month"].apply(get_type)
-        display_df = display_history[["Month", "Price (₹)", "Type"]]
+        display_history["प्रकार"] = display_history["month"].apply(get_type)
+        display_df = display_history[["महिना", "भाव (₹)", "प्रकार"]]
         
         st.dataframe(display_df, use_container_width=True)
         
         # Plot full history + predictions
         full_plot_df = history.copy()
-        full_plot_df["Month"] = full_plot_df["month"].dt.strftime("%Y-%m")
-        full_plot_df["Price (₹)"] = full_plot_df["avg_modal_price"].round(2)
-        st.line_chart(full_plot_df.set_index("Month")["Price (₹)"])
+        full_plot_df["महिना"] = full_plot_df["month"].dt.strftime("%Y-%m")
+        full_plot_df["भाव (₹)"] = full_plot_df["avg_modal_price"].round(2)
+        st.line_chart(full_plot_df.set_index("महिना")["भाव (₹)"])
 
     # LLM Integration
     st.markdown("---")
-    st.subheader("💬 Farm AI Assistant")
-    st.markdown("Ask the AI about your crop, prices, or weather!")
+    st.subheader("💬 फार्म एआय असिस्टंट (AI मदतनीस)")
+    st.markdown("तुमचे पीक, भाव किंवा हवामानाबद्दल AI ला विचारा!")
+    st.caption("**अस्वीकरण:** AI चे प्रतिसाद आणि भावाचे अंदाज केवळ माहितीसाठी आहेत आणि ते वास्तविक बाजारभावाची हमी देत नाहीत.")
     
     if GROQ_API_KEY:
         if "messages" not in st.session_state:
@@ -347,22 +349,23 @@ else:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
                 
-        if prompt := st.chat_input("Ask about your crop prices or weather..."):
+        if prompt := st.chat_input("तुमचे पीक, भाव किंवा हवामानाबद्दल विचारा..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
                 
             with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
+                with st.spinner("विचार करत आहे..."):
                     try:
                         client = Groq(api_key=GROQ_API_KEY)
                         
                         system_prompt = f"""
-                        You are an expert agricultural advisor. The user is asking about {selected_crop}.
-                        Forecasted prices:
+                        तुम्ही एक तज्ज्ञ कृषी सल्लागार आहात. वापरकर्ता {selected_crop} बद्दल विचारत आहे.
+                        अपेक्षित भाव (Forecasted prices):
                         {display_df.to_string(index=False)}
-                        Live 14-day weather: Temp: {weather_metrics['avg_temp']:.1f}°C, Rain: {weather_metrics['total_rain']:.1f} mm.
-                        Provide a concise and helpful response directly to the farmer.
+                        पुढील १४ दिवसांचे हवामान: तापमान: {weather_metrics['avg_temp']:.1f}°C, पाऊस: {weather_metrics['total_rain']:.1f} मिमी.
+                        शेतकऱ्याला थेट आणि संक्षिप्त स्वरूपात मदत करणारा प्रतिसाद द्या. तुमचा संपूर्ण प्रतिसाद मराठी भाषेत (in Marathi) असणे आवश्यक आहे. 
+                        वापरकर्त्याला नेहमी थोडक्यात आठवण करून द्या की हे केवळ अंदाजित भाव आहेत आणि वास्तविक जीवनातील भावांची हमी देत नाहीत.
                         """
                         
                         api_messages = [{"role": "system", "content": system_prompt}]
@@ -379,6 +382,6 @@ else:
                         st.markdown(response)
                         st.session_state.messages.append({"role": "assistant", "content": response})
                     except Exception as e:
-                        st.error(f"Error communicating with Groq API: {e}")
+                        st.error(f"Groq API शी संवाद साधताना त्रुटी: {e}")
     else:
-        st.warning("⚠️ Groq API Key is not set. Please enter it in the sidebar Configuration to use the AI assistant.")
+        st.warning("⚠️ Groq API Key सेट केलेली नाही. कृपया AI मदतनीस वापरण्यासाठी ती बाजूच्या 'कॉन्फिगरेशन' मध्ये टाका.")
