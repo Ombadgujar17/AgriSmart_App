@@ -422,8 +422,7 @@ else:
             history = pd.concat([history, new_row], ignore_index=True)
             current_date = current_date + pd.DateOffset(months=1)
 
-        current_system_date = pd.Timestamp(year=pd.Timestamp.today().year, month=pd.Timestamp.today().month, day=1)
-        start_display_date = current_system_date - pd.DateOffset(months=3)
+        start_display_date = latest_date - pd.DateOffset(months=3)
         
         display_history = history[(history["month"] >= start_display_date) & (history["month"] <= target_date)].copy()
         if display_history.empty:
