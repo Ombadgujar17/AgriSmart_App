@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
@@ -455,6 +456,11 @@ Provide a concise and helpful response directly to the farmer in English. Always
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=500, detail=str(e))
+
+# Serve compiled Flutter Web frontend at root if built
+WEB_DIR = resolve_path("mobile/build/web")
+if os.path.exists(WEB_DIR) and os.path.exists(os.path.join(WEB_DIR, "index.html")):
+    app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

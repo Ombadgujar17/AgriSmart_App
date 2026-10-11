@@ -112,3 +112,46 @@ The project is pre-configured with a Render Blueprint (`render.yaml`).
 
 Once deployed, Render gives you a public HTTPS URL (e.g., `https://agrismart-backend.onrender.com`).
 In your mobile app, tap the **Settings (⚙️)** icon, enter `https://<your-service-name>.onrender.com/api`, and tap **Test Connection**!
+
+---
+
+## Deploying the Frontend
+
+You have multiple convenient ways to deploy and distribute the AgriSmart frontend:
+
+### Method 1: All-in-One Full-Stack on Render (Easiest - 1 URL for Both!)
+Your FastAPI backend is now configured to automatically serve the pre-compiled Flutter Web app directly at the root URL `/`!
+- **How it works**: When you push your code, the backend on Render serves both the Flutter Web app on `https://agrismart-backend.onrender.com/` and the API endpoints at `/api/...`.
+- **Advantage**: 
+  - Stays 100% within Render's Free tier (only 1 service needed).
+  - Works automatically on mobile browsers (Safari, Chrome) as an installable Progressive Web App (PWA).
+  - No CORS configuration required.
+
+### Method 2: Free Hosting on GitHub Pages (Automated via GitHub Actions)
+A pre-configured GitHub Actions workflow (`.github/workflows/deploy-web.yml`) is included in the repository.
+1. Push your code to GitHub.
+2. In your GitHub repository, go to **Settings** $\rightarrow$ **Pages**.
+3. Under **Build and deployment** $\rightarrow$ **Source**, select **GitHub Actions**.
+4. Every push to `main` will automatically compile and publish your Flutter Web app to:
+   ```
+   https://ombadgujar17.github.io/AgriSmart_App/
+   ```
+
+### Method 3: Deploy as a Render Static Site
+If you prefer a standalone frontend service on Render:
+1. In Render Dashboard, click **New +** $\rightarrow$ **Static Site**.
+2. Connect your GitHub repository.
+3. Configure:
+   - **Name**: `agrismart-web`
+   - **Publish Directory**: `mobile/build/web`
+4. Click **Create Static Site**.
+
+### Method 4: Build Android APK for Farmers' Phones
+To distribute an installable Android app (.apk) directly to farmers:
+```bash
+cd mobile
+flutter build apk --release
+```
+The installable APK will be generated at:
+`mobile/build/app/outputs/flutter-apk/app-release.apk`
+You can send this APK via WhatsApp, upload to Google Drive, or attach it to a GitHub Release.

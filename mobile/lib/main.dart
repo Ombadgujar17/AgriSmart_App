@@ -295,6 +295,14 @@ class _HomePageState extends State<HomePage> {
 
   String _getDefaultServerUrl() {
     if (kIsWeb) {
+      if (Uri.base.scheme.startsWith('http')) {
+        final origin = Uri.base.origin;
+        if (origin.isNotEmpty &&
+            !origin.contains("localhost") &&
+            !origin.contains("127.0.0.1")) {
+          return "$origin/api";
+        }
+      }
       return "http://127.0.0.1:8000/api";
     }
     try {
