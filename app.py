@@ -347,7 +347,18 @@ if use_custom_data:
     history = pd.concat([history, new_rows], ignore_index=True)
     latest_date = current_date_input
 else:
-    latest_date = latest_csv_date
+    current_system_date = pd.Timestamp(year=pd.Timestamp.today().year, month=pd.Timestamp.today().month, day=1)
+    default_price = CURRENT_MARKET_PRICES_2026.get(selected_crop, float(history["avg_modal_price"].iloc[-1]))
+    last_qty = float(history["total_quantity"].iloc[-1])
+    prev_month_system = current_system_date - pd.DateOffset(months=1)
+    new_rows = pd.DataFrame({
+        "crop": [selected_crop, selected_crop],
+        "month": [prev_month_system, current_system_date],
+        "avg_modal_price": [float(default_price * 0.95), float(default_price)],
+        "total_quantity": [last_qty, last_qty]
+    })
+    history = pd.concat([history, new_rows], ignore_index=True)
+    latest_date = current_system_date
 
 st.sidebar.markdown("---")
 st.sidebar.subheader(t["prediction_settings_header"])
@@ -433,9 +444,14 @@ else:
         display_history[t["price_col"]] = display_history["avg_modal_price"].round(2)
         
         def get_type(d):
-            if d > latest_date: return t["type_predicted"]
-            elif d == latest_date: return t["type_current"]
-            else: return t["type_historical"]
+            if d.year < 2026:
+                return t["type_historical"]
+            elif d > latest_date:
+                return t["type_predicted"]
+            elif d == latest_date:
+                return t["type_current"]
+            else:
+                return t["type_historical"]
             
         display_history[t["type_col"]] = display_history["month"].apply(get_type)
         display_df = display_history[[t["month_col"], t["price_col"], t["type_col"]]]
