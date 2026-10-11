@@ -73,7 +73,42 @@ Run on your desired platform:
 
 ## Network Connection Presets in Settings
 Inside the app Settings dialog (⚙️ icon in the top right), you can quickly pick:
-1. **Android Emulator**: `http://10.0.2.2:8000/api`
-2. **Localhost (iOS / Web / macOS)**: `http://127.0.0.1:8000/api`
-3. **Wi-Fi LAN (Physical Devices)**: `http://<your-computer-ip>:8000/api`
-4. **Test Connection Button**: Immediately tests latency and connectivity to the backend.
+1. **Render Cloud**: `https://agrismart-backend.onrender.com/api` (or your Render URL)
+2. **Android Emulator**: `http://10.0.2.2:8000/api`
+3. **Localhost (iOS / Web / macOS)**: `http://127.0.0.1:8000/api`
+4. **Wi-Fi LAN (Physical Devices)**: `http://<your-computer-ip>:8000/api`
+5. **Test Connection Button**: Immediately tests latency and connectivity to the backend.
+
+---
+
+## Deploying Backend to Render (Step-by-Step)
+
+The project is pre-configured with a Render Blueprint (`render.yaml`).
+
+### Option A: Using Render Blueprint (Fastest & Recommended)
+1. Push your code to your GitHub repository (`git push origin main`).
+2. Log into [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** $\rightarrow$ **Blueprint**.
+4. Select your `AgriSmart_App` repository.
+5. Render will automatically detect `render.yaml` and configure the service.
+6. (Optional) Under environment variables, add your `GROQ_API_KEY`.
+7. Click **Apply**. Render will build and deploy your API!
+
+### Option B: Manual Web Service Setup on Render
+1. In Render Dashboard, click **New +** $\rightarrow$ **Web Service**.
+2. Connect your GitHub repository.
+3. Configure the settings:
+   - **Name**: `agrismart-backend` (or any name you like)
+   - **Language / Runtime**: `Python 3`
+   - **Branch**: `main`
+   - **Root Directory**: `.` (leave as root)
+   - **Build Command**: `pip install -r backend/requirements.txt`
+   - **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+   - **Instance Type**: `Free`
+4. (Optional) Under **Environment Variables**, add:
+   - `GROQ_API_KEY`: `<your-groq-api-key>`
+   - `PYTHON_VERSION`: `3.12.8`
+5. Click **Create Web Service**.
+
+Once deployed, Render gives you a public HTTPS URL (e.g., `https://agrismart-backend.onrender.com`).
+In your mobile app, tap the **Settings (⚙️)** icon, enter `https://<your-service-name>.onrender.com/api`, and tap **Test Connection**!

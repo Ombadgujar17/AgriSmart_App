@@ -26,8 +26,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATA_FILE = "../data/Jalgaon_all_crops_monthly.csv"
-WEATHER_FILE = "../data/jalgaon_weather_history.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(BASE_DIR)
+
+def resolve_path(rel_path: str) -> str:
+    candidates = [
+        os.path.normpath(os.path.join(REPO_ROOT, rel_path)),
+        os.path.normpath(os.path.join(BASE_DIR, rel_path)),
+        os.path.normpath(os.path.join(BASE_DIR, "..", rel_path)),
+        os.path.normpath(os.path.join(os.getcwd(), rel_path)),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return os.path.normpath(os.path.join(REPO_ROOT, rel_path))
+
+DATA_FILE = resolve_path("data/Jalgaon_all_crops_monthly.csv")
+WEATHER_FILE = resolve_path("data/jalgaon_weather_history.csv")
 
 CURRENT_MARKET_PRICES_2026 = {
     "Bajra": 2500.0,
@@ -233,7 +248,7 @@ def _compute_forecast(
     price_7_days_ago: Optional[float],
     custom_price: Optional[float]
 ):
-    model_file = f"../models/crop_price_weather_model_{crop}.pkl"
+    model_file = resolve_path(f"models/crop_price_weather_model_{crop}.pkl")
     if not os.path.exists(model_file):
         raise HTTPException(status_code=404, detail=f"Model for {crop} not found! Please run train_weather_model.py again.")
         
@@ -443,4 +458,5 @@ Provide a concise and helpful response directly to the farmer in English. Always
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

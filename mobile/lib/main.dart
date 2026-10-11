@@ -209,7 +209,7 @@ class _AgriSmartAppState extends State<AgriSmartApp> {
           secondary: const Color(0xFFF57F17),
           surface: Colors.white,
         ),
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.notoSansTextTheme(Theme.of(context).textTheme),
         scaffoldBackgroundColor: const Color(0xFFF9FAF9),
       ),
       home: HomePage(
@@ -788,11 +788,12 @@ class _HomePageState extends State<HomePage> {
                           },
                         ),
                         ActionChip(
-                          label: const Text("Wi-Fi LAN (10.226.135.62)"),
+                          avatar: const Icon(Icons.cloud_outlined, size: 16),
+                          label: const Text("Render Cloud"),
                           onPressed: () {
                             setModalState(() {
                               _serverUrlController.text =
-                                  "http://10.226.135.62:8000/api";
+                                  "https://agrismart-backend.onrender.com/api";
                             });
                           },
                         ),
@@ -1023,7 +1024,9 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(fontSize: 12, color: Colors.red.shade900),
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -1035,7 +1038,6 @@ class _HomePageState extends State<HomePage> {
                 label: Text(t('retry_connection')),
                 onPressed: _checkConnectionAndLoad,
               ),
-              const SizedBox(width: 8),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   visualDensity: VisualDensity.compact,
@@ -1755,21 +1757,33 @@ class _HomePageState extends State<HomePage> {
 
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 16,
+          runSpacing: 6,
           children: [
-            Container(width: 14, height: 4, color: Colors.blue),
-            const SizedBox(width: 6),
-            Text(
-              "${t('type_historical')} / ${t('type_current')}",
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 14, height: 4, color: Colors.blue),
+                const SizedBox(width: 6),
+                Text(
+                  "${t('type_historical')} / ${t('type_current')}",
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            Container(width: 14, height: 4, color: Colors.orange),
-            const SizedBox(width: 6),
-            Text(
-              t('type_predicted'),
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 14, height: 4, color: Colors.orange),
+                const SizedBox(width: 6),
+                Text(
+                  t('type_predicted'),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ],
         ),
