@@ -266,20 +266,8 @@ def _compute_forecast(
         history = pd.concat([history, new_rows], ignore_index=True)
         latest_date = current_date_input
     else:
-        # The CSV dataset ends at March 2025, which is strictly Historical.
-        # Now it is 2026. Automatically bridge to current 2026 market baseline:
-        current_system_date = pd.Timestamp(year=datetime.today().year, month=datetime.today().month, day=1)
-        default_price = CURRENT_MARKET_PRICES_2026.get(crop, float(history["avg_modal_price"].iloc[-1]))
-        last_qty = float(history["total_quantity"].iloc[-1])
-        prev_month_system = current_system_date - pd.DateOffset(months=1)
-        new_rows = pd.DataFrame({
-            "crop": [crop, crop],
-            "month": [prev_month_system, current_system_date],
-            "avg_modal_price": [float(default_price * 0.95), float(default_price)],
-            "total_quantity": [last_qty, last_qty]
-        })
-        history = pd.concat([history, new_rows], ignore_index=True)
-        latest_date = current_system_date
+        # Default: Use only the authentic data available in the CSV dataset.
+        latest_date = latest_csv_date
         
     target_date = pd.Timestamp(year=max(target_year, latest_date.year), month=target_month, day=1)
     
@@ -325,13 +313,13 @@ def _compute_forecast(
         current_date = current_date + pd.DateOffset(months=1)
         
     historical_results = []
-    start_display_date = latest_date - pd.DateOffset(months=3)
+    start_display_date = latest_date - pd.DateOffset(months=5)
     display_history = history[(history["month"] >= start_display_date) & (history["month"] <= latest_date)].copy()
     if display_history.empty:
         display_history = history[history["month"] <= latest_date].tail(6).copy()
 
     for _, row in display_history.iterrows():
-        is_current = (row["month"] == latest_date and row["month"].year >= 2026)
+        is_current = (row["month"] == latest_date and use_custom_data and row["month"].year >= 2026)
         historical_results.append({
             "month": row["month"].strftime("%Y-%m"),
             "price": float(round(row["avg_modal_price"], 2)),

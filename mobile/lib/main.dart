@@ -1899,9 +1899,9 @@ class _HomePageState extends State<HomePage> {
           final monthStr = "${row['month']}";
           String type = row['type'] ?? "";
 
-          // Safeguard: Any date prior to 2026 is strictly Historical
+          // Safeguard: Any date prior to 2026 cannot be "Current"
           final year = int.tryParse(monthStr.split("-").first) ?? 2025;
-          if (year < 2026) {
+          if (year < 2026 && type == "Current") {
             type = "Historical";
           }
 
